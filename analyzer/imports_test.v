@@ -9,7 +9,7 @@ const (
 	import os
 	import env
 	'
-	sample_content_bytes = sample_content.bytes()
+	sample_content_bytes = ByteArrayInput(sample_content.bytes())
 	vexe_path            = os.dir(os.getenv('VEXE'))
 	// not a real path
 	file_path            = '@TEST/hello.v'

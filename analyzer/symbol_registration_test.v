@@ -23,6 +23,7 @@ fn test_symbol_registration() ? {
 	store.import_modules(mut imports)
 
 	mut sym_analyzer := SymbolAnalyzer{
+		input: &analyzer.AnalyzerInput{}
 		store: store
 		is_test: true
 	}
@@ -62,15 +63,14 @@ fn test_symbol_registration() ? {
 
 		println(bench.step_message('Testing $test_name'))
 		tree := parser.parse_string(src)
-		sym_analyzer.src_text = src.bytes()
-		sym_analyzer.cursor = new_tree_cursor(tree.root_node())
+		sym_analyzer.input = &analyzer.AnalyzerInput{src.bytes(), new_tree_cursor(tree.root_node())} 
 		symbols, _ := sym_analyzer.analyze()
 		result := an_test_utils.sexpr_str_symbol_array(symbols)
 		assert test_utils.newlines_to_spaces(expected) == result
 		println(bench.step_message_ok(test_name))
 
 		unsafe {
-			sym_analyzer.src_text.free()
+			sym_analyzer.input.free()
 		}
 
 		store.delete(store.cur_dir)

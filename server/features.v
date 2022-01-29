@@ -220,7 +220,7 @@ fn (mut ls Vls) signature_help(id string, params string) {
 	}
 
 	ls.store.set_active_file_path(uri.path(), file.version)
-	sym := ls.store.infer_symbol_from_node(node, file.source) or {
+	sym := ls.store.infer_symbol_from_node(node, analyzer.ByteArrayInput(file.source)) or {
 		ls.send_null(id)
 		return
 	}
@@ -291,7 +291,7 @@ fn (mut ls Vls) signature_help(id string, params string) {
 struct CompletionBuilder {
 mut:
 	store              &analyzer.Store
-	src                []byte
+	src                analyzer.ByteArrayInput
 	offset             int
 	parent_node        C.TSNode
 	show_global        bool // for displaying global (project) symbols
@@ -309,7 +309,7 @@ fn (mut builder CompletionBuilder) add(item lsp.CompletionItem) {
 }
 
 fn (builder CompletionBuilder) is_triggered(node C.TSNode, chr string) bool {
-	return node.next_sibling() or { return false }.code(builder.src) == chr
+	return builder.src.node_text(node.next_sibling() or { return false }) == chr
 		|| builder.ctx.trigger_character == chr
 }
 
@@ -361,7 +361,7 @@ fn (mut builder CompletionBuilder) build_suggestions_from_stmt(node C.TSNode) {
 			if expr_list_count == left_count {
 				last_left_node := left_node.named_child(left_count - 1) or { return }
 				builder.filter_return_type = builder.store.infer_value_type_from_node(last_left_node,
-					builder.src)
+					analyzer.ByteArrayInput(builder.src))
 				builder.show_local = true
 			}
 		}
@@ -411,7 +411,7 @@ fn (mut builder CompletionBuilder) build_suggestions_from_list(node C.TSNode) {
 		'import_symbols_list' {
 			import_node := closest_symbol_node_parent(node)
 			import_path_node := import_node.child_by_field_name('path') or { return }
-			import_path := import_path_node.code(builder.src)
+			import_path := builder.src.node_text(import_path_node)
 			builder.build_suggestions_from_module(import_path)
 		}
 		'type_list' {
@@ -439,7 +439,7 @@ fn (mut builder CompletionBuilder) build_suggestions_from_expr(node C.TSNode) {
 			builder.show_global = false
 			builder.show_local = false
 
-			text := node.code(builder.src)
+			text := builder.src.node_text(node)
 
 			if builder.is_selector(node) {
 				mut selected_node := node
@@ -840,7 +840,7 @@ fn (mut ls Vls) completion(id string, params string) {
 	// purposes.
 	mut builder := CompletionBuilder{
 		store: &ls.store
-		src: file.source
+		src: analyzer.ByteArrayInput(file.source)
 		parent_node: root_node
 	}
 
@@ -967,7 +967,7 @@ fn (mut ls Vls) hover(id string, params string) {
 	})
 }
 
-fn get_hover_data(mut store analyzer.Store, node C.TSNode, uri lsp.DocumentUri, source []byte, offset u32) ?lsp.Hover {
+fn get_hover_data(mut store analyzer.Store, node C.TSNode, uri lsp.DocumentUri, source analyzer.ByteArrayInput, offset u32) ?lsp.Hover {
 	node_type_name := node.type_name()
 	if node.is_null() || node_type_name == 'comment' {
 		return none
@@ -979,7 +979,7 @@ fn get_hover_data(mut store analyzer.Store, node C.TSNode, uri lsp.DocumentUri, 
 	// eprintln('$node_type_name | ${node.code(source)}')
 	if node_type_name == 'module_clause' {
 		return lsp.Hover{
-			contents: lsp.v_marked_string(node.code(source))
+			contents: lsp.v_marked_string(source.node_text(node))
 			range: tsrange_to_lsp_range(node.range())
 		}
 	} else if node_type_name == 'import_path' {
@@ -1104,7 +1104,7 @@ fn (mut ls Vls) definition(id string, params string) {
 	}
 
 	ls.store.set_active_file_path(uri.path(), file.version)
-	sym := ls.store.infer_symbol_from_node(node, source) or { analyzer.void_sym }
+	sym := ls.store.infer_symbol_from_node(node, analyzer.ByteArrayInput(source)) or { analyzer.void_sym }
 	if isnil(sym) || sym.is_void() {
 		ls.send_null(id)
 		return
@@ -1204,7 +1204,7 @@ fn (mut ls Vls) implementation(id string, params string) {
 		if parent_node.type_name() == 'interface_declaration' {
 			got_sym = ls.store.symbols[ls.store.cur_dir].get(node.code(source)) or { got_sym }
 		} else {
-			got_sym = ls.store.infer_value_type_from_node(node, source)
+			got_sym = ls.store.infer_value_type_from_node(node, analyzer.ByteArrayInput(source))
 		}
 	}
 

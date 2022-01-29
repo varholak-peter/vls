@@ -26,11 +26,13 @@ fn test_semantic_analysis() ? {
 	store.import_modules(mut imports)
 
 	mut sym_analyzer := SymbolAnalyzer{
+		input: &analyzer.AnalyzerInput{}
 		store: store
 		is_test: true
 	}
 
 	mut semantic_analyzer := SemanticAnalyzer{
+		input: sym_analyzer.input
 		store: store
 	}
 
@@ -73,11 +75,8 @@ fn test_semantic_analysis() ? {
 		cursor := new_tree_cursor(tree.root_node())
 		store.import_modules_from_tree(tree, src_bytes, vlib_path)
 
-		sym_analyzer.src_text = src_bytes
-		sym_analyzer.cursor = cursor
-
-		semantic_analyzer.src_text = src_bytes
-		semantic_analyzer.cursor = cursor
+		sym_analyzer.input = &analyzer.AnalyzerInput{src_bytes, cursor}
+		semantic_analyzer.input = sym_analyzer.input
 
 		symbols, _ := sym_analyzer.analyze()
 		messages := semantic_analyzer.analyze()
@@ -87,7 +86,7 @@ fn test_semantic_analysis() ? {
 		println(bench.step_message_ok(test_name))
 
 		unsafe {
-			sym_analyzer.src_text.free()
+			sym_analyzer.input.free()
 		}
 
 		store.delete(store.cur_dir)
