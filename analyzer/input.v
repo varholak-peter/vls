@@ -45,5 +45,5 @@ pub fn (i ByteArrayInput) is_empty() bool {
 }
 
 pub fn (i ByteArrayInput) len() int {
-	return i.len()
+	return i.len
 }
