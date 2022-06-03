@@ -11,17 +11,17 @@ pub mut:
 	absolute_module_name string
 	// module_name is the name to be used for symbol lookups
 	module_name string
-	// path is the path where the module was located.
-	path string
+	// module_id is the location where the module was located.
+	module_id ModuleId
 	// track the location of the import statements
 	// this one uses the full path instead of the usual file name
 	// for error reporting (just in case)
-	ranges map[string]C.TSRange
+	ranges map[FileId]C.TSRange
 	// original module_names are not recorded as aliases
 	// e.g {'file.v': 'foo', 'file1.v': 'bar'}
-	aliases map[string]string
+	aliases map[FileId]string
 	// e.g {'file.v': ['Any', 'decode', 'encode'], 'file2.v': ['foo']}
-	symbols map[string][]string
+	symbols map[FileId][]string
 }
 
 // set_alias records/changes the alias of the import from the file
@@ -74,16 +74,4 @@ pub fn (mut imp Import) set_path(path string) {
 
 	imp.resolved = true
 	imp.path = path
-}
-
-[unsafe]
-pub fn (imp &Import) free() {
-	unsafe {
-		// imp.absolute_module_name.free()
-		// imp.module_name.free()
-		// imp.path.free()
-		imp.ranges.free()
-		imp.aliases.free()
-		imp.symbols.free()
-	}
 }

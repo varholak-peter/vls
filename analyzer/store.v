@@ -39,9 +39,12 @@ pub mut:
 	// Symbol table
 	// map goes: map[<full dir path>]map[]&Symbol
 	symbols map[string][]&Symbol
+	// Project store
+	// A collection of projects (e.g. directory with one or more modules)
+	projects ProjectStore
 	// Scope data for different opened files
 	// map goes: map[<full file path>]&ScopeTree
-	opened_scopes map[string]&ScopeTree
+	// opened_scopes map[string]&ScopeTree
 	// paths to be imported aside from the ones
 	// specified from lookup paths specified from
 	// import_modules_from_tree

@@ -1,5 +1,7 @@
 module depgraph
 
+pub type ModuleId = u16
+
 // Taken from: https://gist.github.com/Fordi/1706368
 // Transpiled to ES6 for readability using Lebab: https://lebab.unibtc.me/editor
 // Credits to: https://github.com/Fordi
@@ -8,7 +10,7 @@ module depgraph
 pub struct Tree {
 mut:
 	len    int
-	keys   []string
+	keys   []ModuleId
 	values []&Node
 }
 
@@ -84,8 +86,8 @@ pub struct Node {
 mut:
 	tree &Tree = &Tree(0)
 pub mut:
-	id           string
-	dependencies []string
+	id           ModuleId
+	dependencies []ModuleId
 }
 
 pub fn (node &Node) str() string {

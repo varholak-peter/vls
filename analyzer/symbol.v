@@ -76,22 +76,22 @@ pub enum SymbolLanguage {
 	v
 }
 
-// pub enum Platform {
-// 	auto
-// 	ios
-// 	macos
-// 	linux
-// 	windows
-// 	freebsd
-// 	openbsd
-// 	netbsd
-// 	dragonfly
-// 	js
-// 	android
-// 	solaris
-// 	haiku
-// 	cross
-// }
+pub enum Platform {
+	auto
+	ios
+	macos
+	linux
+	windows
+	freebsd
+	openbsd
+	netbsd
+	dragonfly
+	js
+	android
+	solaris
+	haiku
+	cross
+}
 
 pub enum SymbolAccess {
 	private
