@@ -70,29 +70,6 @@ fn (kind SymbolKind) str() string {
 	}
 }
 
-pub enum SymbolLanguage {
-	c
-	js
-	v
-}
-
-pub enum Platform {
-	auto
-	ios
-	macos
-	linux
-	windows
-	freebsd
-	openbsd
-	netbsd
-	dragonfly
-	js
-	android
-	solaris
-	haiku
-	cross
-}
-
 pub enum SymbolAccess {
 	private
 	private_mutable
